@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Greeting App</title>
+    <script src="jquery-2.1.4.js"></script>
+    <script>
+    function Greeter(){
+        var _data = {};
+        var self = this;
+
+        this.set = function(attrName, value){
+            _data[attrName] = value;
+            var callbackFns = _callbacks[attrName] || [];
+            callbackFns.forEach(function(callbackFn){
+                callbackFn.call(self);
+            });
+        };
+
+        this.get = function(attrName){
+            return _data[attrName];
+        };
+
+        var _callbacks = {};
+
+        this.onChange = function(attrName, callbackFn){
+            _callbacks[attrName] = _callbacks[attrName] || [];
+            _callbacks[attrName].push(callbackFn);
+        }
+    }
+    Greeter.prototype.greet = function(){
+        var hour = new Date().getHours();
+        var message = '';
+        if (hour < 12){
+            message = 'Hi ' + this.get('name') + ', Good Morning!';
+        } else {
+            message = 'Hi ' + this.get('name') + ', Good Afternoon!';
+        }
+        this.set('message', message);
+    }
+
+    $(function(){
+        window.greeter = new Greeter();
+        //React to user actions
+        $("#txtName").change(function(){
+            greeter.set('name', this.value);
+        });
+        $("#btnGreet").click(function(){
+            greeter.greet();
+        });
+
+        //React to Model Changes
+        greeter.onChange('name', function(){
+            $("#txtName").val(this.get('name'));
+        });
+        greeter.onChange('message', function(){
+            $("#divMessage").html(this.get('message'));
+        });
+    })
+
+    </script>
+</head>
+<body>
+    <h1>Greeting App</h1>
+    <hr>
+    <div class="content">
+        <label for="">Name:</label>
+        <input type="text" name="" id="txtName">
+        <input type="button" value="Greet" id="btnGreet">
+        <div id="divMessage"></div>
+    </div>
+</body>
+</html>
