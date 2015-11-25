@@ -39,23 +39,28 @@
         this.set('message', message);
     }
 
-    $(function(){
-        window.greeter = new Greeter();
-        //React to user actions
-        $("#txtName").change(function(){
-            greeter.set('name', this.value);
+    function GreeterView(model, $context){
+        $("#txtName", $context).change(function(){
+            model.set('name', this.value);
         });
-        $("#btnGreet").click(function(){
-            greeter.greet();
+        $("#btnGreet", $context).click(function(){
+            model.greet();
         });
 
         //React to Model Changes
-        greeter.onChange('name', function(){
-            $("#txtName").val(this.get('name'));
+        model.onChange('name', function(){
+            $("#txtName", $context).val(this.get('name'));
         });
-        greeter.onChange('message', function(){
-            $("#divMessage").html(this.get('message'));
+        model.onChange('message', function(){
+            $("#divMessage", $context).html(this.get('message'));
         });
+    }
+
+    $(function(){
+        window.greeter = new Greeter();
+        var view1 = new GreeterView(greeter, $("#view1"));
+        var view2 = new GreeterView(greeter, $("#view2"));
+
     })
 
     </script>
@@ -63,7 +68,14 @@
 <body>
     <h1>Greeting App</h1>
     <hr>
-    <div class="content">
+    <div class="content" id="view1">
+        <label for="">Name:</label>
+        <input type="text" name="" id="txtName">
+        <input type="button" value="Greet" id="btnGreet">
+        <div id="divMessage"></div>
+    </div>
+    <hr>
+    <div class="content" id="view2">
         <label for="">Name:</label>
         <input type="text" name="" id="txtName">
         <input type="button" value="Greet" id="btnGreet">
