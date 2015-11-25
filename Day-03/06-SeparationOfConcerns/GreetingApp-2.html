@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <title>Greeting App</title>
     <script src="jquery-2.1.4.js"></script>
+    <script type="text/template" id="greeterTemplate">
+        <hr>
+        <div class="content" id="view1">
+        <label for="">Name:</label>
+        <input type="text" name="" id="txtName">
+        <input type="button" value="Greet" id="btnGreet">
+        <div id="divMessage"></div>
+        </div>
+    </script>
     <script>
     function Greeter(){
         var _data = {};
@@ -39,28 +48,36 @@
         this.set('message', message);
     }
 
-    function GreeterView(model, $context){
-        $("#txtName", $context).change(function(){
+    function GreeterView(model, templateId){
+        var template = '';
+        var $el = this.$el = $("<div></div>");
+
+        $el.on("change", "#txtName", function(){
             model.set('name', this.value);
         });
-        $("#btnGreet", $context).click(function(){
+        $el.on('click',"#btnGreet", function(){
             model.greet();
         });
 
         //React to Model Changes
         model.onChange('name', function(){
-            $("#txtName", $context).val(this.get('name'));
+            $("#txtName", $el).val(this.get('name'));
         });
         model.onChange('message', function(){
-            $("#divMessage", $context).html(this.get('message'));
+            $("#divMessage", $el).html(this.get('message'));
         });
+
+        this.render = function(){
+            var template = $(templateId).html();
+            $el.append(template);
+            return this;
+        };
     }
 
     $(function(){
-        window.greeter1 = new Greeter();
-        window.greeter2 = new Greeter();
-        var view1 = new GreeterView(greeter1, $("#view1"));
-        var view2 = new GreeterView(greeter2, $("#view2"));
+        window.greeter = new Greeter();
+
+
 
     })
 
@@ -68,19 +85,7 @@
 </head>
 <body>
     <h1>Greeting App</h1>
-    <hr>
-    <div class="content" id="view1">
-        <label for="">Name:</label>
-        <input type="text" name="" id="txtName">
-        <input type="button" value="Greet" id="btnGreet">
-        <div id="divMessage"></div>
-    </div>
-    <hr>
-    <div class="content" id="view2">
-        <label for="">Name:</label>
-        <input type="text" name="" id="txtName">
-        <input type="button" value="Greet" id="btnGreet">
-        <div id="divMessage"></div>
-    </div>
+
+
 </body>
 </html>
