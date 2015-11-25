@@ -36,3 +36,16 @@ calculator.calculate();
 calculator.salary // => 13500
 
 */
+
+function SalaryCalculator(){
+    this.basic = 0;
+    this.hra = 0;
+    this.da = 0;
+    this.tax = 0;
+    this.salary = 0;
+    this.calculate = function(){
+        var gross = this.basic + this.hra + this.da;
+        var net = gross * ((100-this.tax)/100);
+        this.salary = net;
+    }
+}
