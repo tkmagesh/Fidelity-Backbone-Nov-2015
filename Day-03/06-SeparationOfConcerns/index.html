@@ -32,24 +32,26 @@
 
         this.set = function(attrName, value){
             _data[attrName] = value;
-            var callbackFn = _callbacks[attrName];
-            if (typeof callbackFn === 'function')
+            var callbackFns = _callbacks[attrName];
+            callbackFns.forEach(function(callbackFn){
                 callbackFn();
+            });
         };
+
         this.get = function(attrName){
             return _data[attrName];
         };
 
         var _callbacks = {
-            basic : null,
-            hra : null,
-            da : null,
-            tax : null,
-            salary : null
+            basic : [],
+            hra : [],
+            da : [],
+            tax : [],
+            salary : []
         };
 
         this.onChange = function(attrName, callbackFn){
-            _callbacks[attrName] = callbackFn;
+            _callbacks[attrName].push(callbackFn);
         }
     }
     SalaryCalculator.prototype.calculate = function(){
@@ -77,7 +79,7 @@
             calculator.set('tax', $("#rangeTax").val().toInt());
         });
         $("#btnCalculate").click(function(){
-            calculator.calculate();
+                calculator.calculate();
         });
 
 
