@@ -56,6 +56,7 @@
             var $el = this.$el = $("<div></div>");
             this.initialize = function(){
                 productList.on("add", this.render.bind(this));
+                productList.on("remove", this.render.bind(this));
                 $el.on("click", "#btnAdd", this.addProduct);
             };
             var self = this;
