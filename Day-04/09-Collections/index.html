@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Product List</title>
+    <script src="jquery-2.1.4.js"></script>
+    <script src="handlebars-v4.0.5.js"></script>
+    <script type="text/x-handlebars-template" id="productListTemplate">
+    <div class="content">
+        <h1>Product List</h1>
+        <hr>
+        <label for="">Name :</label>
+        <input type="text" name="" id="txtName">
+        <input type="button" value="Add" id="btnAdd">
+        <ol id="olProductList">
+            {{#each list}}
+            <li>{{this}}</li>
+            {{/each}}
+        </ol>
+        <div>
+            <span>Product Count :</span> <span class="count">{{count}}</span>
+        </div>
+   </div>
+    </script>
+    <script>
+        function ProductList(){
+            var _data = [];
+            this.add = function(productName){
+                _data.push(productName);
+                this.trigger('add', productName);
+            };
+            this.remove = function(productName){
+                var index = _data.indexOf(productName);
+                if (index !== -1){
+                    _data.splice(index,1);
+                    this.trigger('remove', productName);
+                }
+            };
+            this.toJson = function(){
+                return JSON.parse(JSON.stringify(_data));
+            };
+            var _callbacks = {};
+            this.on = function(evtName, callback){
+                _callbacks[evtName] = _callbacks[evtName] || [];
+                _callbacks[evtName].push(callback)
+            };
+            this.trigger = function(evtName, data){
+                var callbacks = _callbacks[evtName];
+                callbacks.forEach(function(callback){
+                    callback(data);
+                });
+            };
+        }
+
+        function ProductListView(productList){
+            var $el = this.$el = $("<div></div>");
+            this.initialize = function(){
+                productList.on("add", this.render.bind(this));
+                $el.on("click", "#btnAdd", this.addProduct);
+            };
+            var self = this;
+            this.addProduct = function(){
+                var productName = $("#txtName", $el).val();
+                productList.add(productName);
+            };
+
+            var template = null;
+            this.render = function(){
+                var viewData = {
+                    list : productList.toJson(),
+                    count : productList.toJson().length
+                };
+                if (!template){
+                    var templateHtml = $("#productListTemplate").html();
+                    template = Handlebars.compile(templateHtml);
+                }
+                $el.html(template(viewData));
+                return this;
+            }
+        }
+    </script>
+</head>
+<body>
+
+
+</body>
+</html>
