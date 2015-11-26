@@ -12,6 +12,7 @@
         <label for="">Name :</label>
         <input type="text" name="" id="txtName">
         <input type="button" value="Add" id="btnAdd">
+        <input type="button" value="Remove" id="btnRemove">
         <ol id="olProductList">
             {{#each list}}
             <li>{{this}}</li>
@@ -79,6 +80,12 @@
                 return this;
             }
         }
+        $(function(){
+            window.list = new ProductList();
+            var view = new ProductListView(list);
+            view.initialize();
+            view.render().$el.appendTo(document.body);
+        });
     </script>
 </head>
 <body>
