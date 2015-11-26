@@ -85,11 +85,11 @@
         };
     }*/
 
-    /*$(function(){
+    $(function(){
         window.greeter = new Greeter();
-        var view = new GreeterView(greeter, "#greeterTemplate");
+        var view = new GreeterView({model : greeter});
         view.render().$el.appendTo(document.body);
-    })*/
+    });
 
     </script>
 </head>
