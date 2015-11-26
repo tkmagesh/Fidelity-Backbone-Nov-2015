@@ -11,15 +11,26 @@
         <hr>
         <label for="">Name :</label>
         <input type="text" name="" id="txtName">
+        <label for="">Price :</label>
+        <input type="text" name="" id="txtPrice">
         <input type="button" value="Add" id="btnAdd">
         <input type="button" value="Remove" id="btnRemove">
         <ol id="olProductList">
             {{#each list}}
-            <li>{{this}}</li>
+            <li>
+                <span>{{this}}</span>
+                <span> --- </span>
+                <label for="">Units</label>
+                <input type="text" name="" id="">
+                <input type="button" value="Update">
+                <span> [Product Value] </span>
+            </li>
             {{/each}}
         </ol>
         <div>
             <span>Product Count :</span> <span class="count">{{count}}</span>
+            <br>
+            <span>Total Product Value :</span> <span class="count">[sum(product.units * product.cost)]</span>
         </div>
    </div>
     </script>
