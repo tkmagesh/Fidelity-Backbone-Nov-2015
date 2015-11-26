@@ -56,12 +56,19 @@
         var self = this;
 
         this.set = function(attrName, value){
-            _data[attrName] = value;
+            if (_data[attrName] !== value){
+                _data[attrName] = value;
+                triggerCallback(attrName);
+                triggerCallback('all');
+            }
+        };
+
+        function triggerCallback(attrName){
             var callbackFns = _callbacks[attrName] || [];
             callbackFns.forEach(function(callbackFn){
                 callbackFn.call(self);
             });
-        };
+        }
 
         this.get = function(attrName){
             return _data[attrName];
@@ -73,7 +80,10 @@
             _callbacks[attrName] = _callbacks[attrName] || []
             _callbacks[attrName].push(callbackFn);
         };
-        this.attributes = _data;
+        //this.attributes = _data;
+        this.toJSON = function(){
+            return JSON.parse(JSON.stringify(_data));
+        };
     }
     SalaryCalculator.prototype.calculate = function(){
         var gross = this.get('basic') + this.get('hra') + this.get('da');
@@ -86,26 +96,22 @@
     function SalaryCalculatorView(model, templateId){
         var $el = this.$el = $("<div></div>");
 
-        $el.on("change", "#txtBasic", function(){
-            model.set('basic', this.value.toInt());
-        });
-        $el.on("change", "#txtHra", function(){
-            model.set('hra', this.value.toInt());
-        });
-        $el.on("change", "#txtDa", function(){
-            model.set('da', this.value.toInt());
-        });
-        $el.on("change", "#rangeTax", function(){
-            model.set('tax', this.value.toInt());
-        });
+        $el.on("change", "input:text, input[type='range']", updateModel);
+
         $el.on("click", "#btnCalculate", function(){
             model.calculate();
         });
 
+        function updateModel(){
+            model.set('basic', $("#txtBasic", $el).val().toInt());
+            model.set('hra', $("#txtHra", $el).val().toInt());
+            model.set('da', $("#txtDa", $el).val().toInt());
+            model.set('tax', $("#rangeTax", $el).val().toInt());
+        }
 
-        var self = this;
+
         //Reacting to Model changes
-        model.onChange('basic', function(){
+        /*model.onChange('basic', function(){
             self.render();
         });
         model.onChange('hra', function(){
@@ -119,13 +125,18 @@
         });
         model.onChange('salary', function(){
             self.render();
-        });
+        });*/
+
+        model.onChange('all', this.render.bind(this));
+
+        var template = null;
 
         this.render = function(){
-            var templateHtml = $(templateId).html();
-            var template = Handlebars.compile(templateHtml);
-            var calculatorHtml = template(model.attributes);
-            this.$el.html(calculatorHtml);
+            if (!template){
+                var templateHtml = $(templateId).html();
+                template = Handlebars.compile(templateHtml);
+            }
+            this.$el.html(template(model.toJSON()));
             return this;
         }
     }
