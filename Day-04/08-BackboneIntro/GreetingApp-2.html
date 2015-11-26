@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Greeting App</title>
+    <script src="jquery-2.1.4.js"></script>
+    <script src="underscore.js"></script>
+    <script src="backbone.js"></script>
+
+    <script type="text/template" id="greeterTemplate">
+        <hr>
+        <div class="content">
+        <label for="">Name:</label>
+        <input type="text" name="" id="txtName">
+        <input type="button" value="Greet" id="btnGreet">
+        <div id="divMessage"></div>
+        </div>
+    </script>
+    <script>
+    var Greeter = Backbone.Model.extend({
+        greet : function(){
+            var hour = new Date().getHours();
+            var message = '';
+            if (hour < 12){
+                message = 'Hi ' + this.get('name') + ', Good Morning!';
+            } else {
+                message = 'Hi ' + this.get('name') + ', Good Afternoon!';
+            }
+            this.set('message', message);
+        }
+    });
+
+    var GreeterView = Backbone.View.extend({
+        templateId : "#greeterTemplate",
+        tagName : "div",
+        events : {
+            "change :text" : "updateModel",
+            "click #btnGreet" : "triggerGreet"
+        },
+        triggerGreet : function(){
+            this.model.greet();
+        },
+        updateModel : function(){
+            var name = $("#txtName", this.$el).val();
+            this.model.set('name', name);
+        },
+        initialize : function(){
+            _.bindAll(this, "updateView");
+            this.model.on("change", this.updateView);
+        },
+        updateView : function(){
+            $("#txtName", this.$el).val(this.model.get('name'));
+            $("#divMessage", this.$el).html(this.model.get('message'));
+        },
+        render : function(){
+            var template = $(this.templateId).html();
+            this.$el.html(template);
+            return this;
+        }
+    })
+
+    /*function GreeterView(model, templateId){
+        var template = '';
+        var $el = this.$el = $("<div></div>");
+
+        $el.on("change", "#txtName", function(){
+            model.set('name', this.value);
+        });
+        $el.on('click',"#btnGreet", function(){
+            model.greet();
+        });
+
+        //React to Model Changes
+        model.on('change:name', function(){
+            $("#txtName", $el).val(this.get('name'));
+        });
+        model.on('change:message', function(){
+            $("#divMessage", $el).html(this.get('message'));
+        });
+
+        this.render = function(){
+            var template = $(templateId).html();
+            $el.append(template);
+            return this;
+        };
+    }*/
+
+    /*$(function(){
+        window.greeter = new Greeter();
+        var view = new GreeterView(greeter, "#greeterTemplate");
+        view.render().$el.appendTo(document.body);
+    })*/
+
+    </script>
+</head>
+<body>
+    <h1>Greeting App</h1>
+
+
+</body>
+</html>
