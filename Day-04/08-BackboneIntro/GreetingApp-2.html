@@ -8,13 +8,7 @@
     <script src="backbone.js"></script>
 
     <script type="text/template" id="greeterTemplate">
-        <hr>
-        <div class="content">
-        <label for="">Name:</label>
-        <input type="text" name="" id="txtName">
-        <input type="button" value="Greet" id="btnGreet">
-        <div id="divMessage"></div>
-        </div>
+
     </script>
     <script>
     var Greeter = Backbone.Model.extend({
@@ -31,8 +25,10 @@
     });
 
     var GreeterView = Backbone.View.extend({
-        templateId : "#greeterTemplate",
-        tagName : "div",
+        //templateId : "#greeterTemplate",
+
+        //tagName : "div",
+        el : 'div.content',
         events : {
             "change :text" : "updateModel",
             "click #btnGreet" : "triggerGreet"
@@ -53,8 +49,8 @@
             $("#divMessage", this.$el).html(this.model.get('message'));
         },
         render : function(){
-            var template = $(this.templateId).html();
-            this.$el.html(template);
+            /*var template = $(this.templateId).html();
+            this.$el.html(template);*/
             return this;
         }
     })
@@ -95,7 +91,13 @@
 </head>
 <body>
     <h1>Greeting App</h1>
-
+    <hr>
+        <div class="content">
+            <label for="">Name:</label>
+            <input type="text" name="" id="txtName">
+            <input type="button" value="Greet" id="btnGreet">
+            <div id="divMessage"></div>
+        </div>
 
 </body>
 </html>

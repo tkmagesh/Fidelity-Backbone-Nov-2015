@@ -3,6 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <title>Calculator</title>
+    <script src="underscore.js"></script>
+    <script src="jquery-2.1.4.js"></script>
+    <script src="backbone.js"></script>
+    <script>
+    String.prototype.toInt = function(){
+        return parseInt(this,10);
+    };
+
+    var Calculator = Backbone.Model.extend({
+        defaults : {
+            number1 : 0,
+            number2 : 0,
+            result : 0,
+            operation : ''
+        },
+        add : function(){
+            this.set('result', this.get('number1') + this.get('number2'));
+        },
+        subtract : function(){
+            this.set('result', this.get('number1') - this.get('number2'));
+        },
+        multiply : function(){
+            this.set('result', this.get('number1') * this.get('number2'));
+        },
+        divide : function(){
+            this.set('result', this.get('number1') / this.get('number2'));
+        },
+        calculate : function(){
+            this[this.get('operation')]();
+        }
+    });
+    var CalculatorView = Backbone.View.extend({
+        el : 'div.content',
+        events : {
+            'change :text,select' : 'updateModel',
+            'click #btnCalculate' : 'triggerCalculate'
+        },
+        updateModel : function(){
+            this.model.set('number1', this.$("#txtNumber1").val().toInt());
+            this.model.set('number2', this.$("#txtNumber2").val().toInt());
+            this.model.set('operation', this.$("#selectOperation").val());
+        },
+        triggerCalculate : function(){
+            this.model.calculate();
+        },
+        initialize : function(){
+            _.bindAll(this, 'render');
+            this.model.on('change', this.render);
+        },
+
+        render : function(){
+            this.$("#txtNumber1").val(this.model.get('number1'));
+            this.$("#txtNumber2").val(this.model.get('number2'));
+            this.$("#selectOperation").val(this.model.get('operation'));
+            this.$("#divResult").html(this.model.get('result'));
+        }
+    });
+    $(function(){
+        window.calculator = new Calculator();
+        var view = new CalculatorView({model : calculator});
+        view.render();
+    })
+
+    </script>
 </head>
 <body>
     <h1>Calculator</h1>
