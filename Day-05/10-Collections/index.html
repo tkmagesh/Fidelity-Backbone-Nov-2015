@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Product List</title>
+    <script src="jquery-2.1.4.js"></script>
+    <script src="handlebars-v4.0.5.js"></script>
+    <script type="text/x-handlebars-template" id="productTemplate">
+
+        <span>{{name}} - [@{{price}}]</span>
+        <span> --- </span>
+        <label for="">Units</label>
+        <input type="text" name="" id="txtUnits">
+        <input type="button" value="Update" id="btnUpdate">
+        <span> {{value}} </span>
+
+    </script>
+    <script type="text/x-handlebars-template" id="productListTemplate">
+    <div class="content">
+        <h1>Product List</h1>
+        <hr>
+        <label for="">Name :</label>
+        <input type="text" name="" id="txtName">
+        <label for="">Price :</label>
+        <input type="text" name="" id="txtPrice">
+        <input type="button" value="Add" id="btnAdd">
+        <input type="button" value="Remove" id="btnRemove">
+        <ol id="olProductList">
+            {{#each list}}
+
+            {{/each}}
+        </ol>
+        <div>
+            <span>Product Count :</span> <span class="count">{{count}}</span>
+            <br>
+            <span>Total Product Value :</span> <span class="count" id="listValue">{{listValue}}</span>
+        </div>
+   </div>
+   <hr>
+    </script>
+    <script>
+        /*var Events = (function(){
+            function Events{
+                this._callbacks = {};
+            }
+            Events.prototype.on = function(evtName, callback){
+                _callbacks[evtName] = _callbacks[evtName] || [];
+                _callbacks[evtName].push(callback)
+            };
+            Events.prototype.trigger = function(evtName, data){
+                var callbacks = _callbacks[evtName];
+                callbacks.forEach(function(callback){
+                    callback(data);
+                });
+            };
+            return Events;
+        })();*/
+
+
+
+        function Product(){
+            var _data = {};
+            var self = this;
+
+            this.set = function(attrName, value){
+                _data[attrName] = value;
+                this.trigger(attrName);
+            };
+
+            this.get = function(attrName){
+                return _data[attrName];
+            };
+
+            var _callbacks = {};
+            this.on = function(evtName, callback){
+                _callbacks[evtName] = _callbacks[evtName] || [];
+                _callbacks[evtName].push(callback)
+            };
+            this.trigger = function(evtName, data){
+                var callbacks = _callbacks[evtName] || [];
+                callbacks.forEach(function(callback){
+                    callback(data);
+                });
+            };
+            this.toJson = function(){
+                return JSON.parse(JSON.stringify(_data));
+            };
+        }
+        Product.prototype.update = function(){
+            this.set('value', this.get('units') * this.get('price'));
+        }
+
+
+        function ProductList(){
+            var _data = [];
+            this.add = function(productName, price){
+                var product = new Product();
+                product.set('name', productName);
+                product.set('price', price);
+                product.set('units', 0);
+                product.update();
+                _data.push(product);
+                this.trigger('add', product);
+            };
+            this.remove = function(productName){
+                var index = _data.indexOf(productName);
+                if (index !== -1){
+                    _data.splice(index,1);
+                    this.trigger('remove', productName);
+                }
+            };
+            this.toJson = function(){
+                var result = [];
+                _data.forEach(function(data){
+                    result.push(data.toJson());
+                });
+                return result;
+            };
+            this.totalValue = function(){
+                return _data.reduce(function(result, product){
+                   result += product.value;
+                },0)
+            }
+            var _callbacks = {};
+            this.on = function(evtName, callback){
+                _callbacks[evtName] = _callbacks[evtName] || [];
+                _callbacks[evtName].push(callback)
+            };
+            this.trigger = function(evtName, data){
+                var callbacks = _callbacks[evtName];
+                callbacks.forEach(function(callback){
+                    callback(data);
+                });
+            };
+        }
+
+        function ProductListView(productList){
+            var $el = this.$el = $("<div></div>");
+            this.initialize = function(){
+                productList.on("add", this.onNewProduct.bind(this));
+                productList.on("remove", this.render.bind(this));
+                $el.on("click", "#btnAdd", this.addProduct);
+            };
+            var self = this;
+            this.onNewProduct = function(newProduct){
+                var productView = new ProductView(newProduct);
+                productView.initialize();
+                var productList = $("#olProductList", $el);
+                productView.render().$el.appendTo(productList);
+            }
+
+            this.addProduct = function(){
+                var productName = $("#txtName", $el).val();
+                var productPrice = parseInt($("#txtPrice", $el).val(),10);
+                productList.add(productName, productPrice);
+            };
+
+            var template = null;
+            this.render = function(){
+                var viewData = {
+                    list : productList.toJson(),
+                    count : productList.toJson().length,
+                    listValue : productList.totalValue()
+                };
+                if (!template){
+                    var templateHtml = $("#productListTemplate").html();
+                    template = Handlebars.compile(templateHtml);
+                }
+                $el.html(template(viewData));
+                return this;
+            }
+        }
+
+        function ProductView(product){
+            var $el = this.$el = $("<li></li>");
+            this.initialize = function(){
+                product.on("value", this.render.bind(this));
+                $el.on("click", "#btnUpdate", this.updateProduct);
+            };
+            var self = this;
+            this.updateProduct = function(){
+                var productUnits = $("#txtUnits", $el).val();
+                product.set('units', productUnits);
+                product.update();
+            };
+
+            var template = null;
+            this.render = function(){
+                var viewData = product.toJson();
+                if (!template){
+                    var templateHtml = $("#productTemplate").html();
+                    template = Handlebars.compile(templateHtml);
+                }
+                $el.html(template(viewData));
+                return this;
+            }
+        }
+        $(function(){
+            window.list = new ProductList();
+            var view = new ProductListView(list);
+            view.initialize();
+            view.render().$el.appendTo(document.body);
+        });
+    </script>
+</head>
+<body>
+
+
+</body>
+</html>
