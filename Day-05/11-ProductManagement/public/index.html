@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Product List</title>
+    <script src="jquery-2.1.4.js"></script>
+    <script src="handlebars-v4.0.5.js"></script>
+    <script src="underscore.js"></script>
+    <script src="backbone.js"></script>
+
+    <script type="text/x-handlebars-template" id="productTemplate">
+
+        <span>{{name}} - [@{{price}}]</span>
+        <span> --- </span>
+        <label for="">Units</label>
+        <input type="text" name="" id="txtUnits" value="{{units}}">
+        <input type="button" value="Update" id="btnUpdate">
+        <span> {{value}} </span>
+        <input type="button" value="Remove" id="btnRemove">
+    </script>
+
+    <script type="text/x-handlebars-template" id="productListTemplate">
+
+   </div>
+   <hr>
+    </script>
+    <script>
+       var Product = Backbone.Model.extend({
+           defaults : {
+               name : '',
+               units : 0,
+               price : 0,
+               value : 0
+           },
+           update : function(){
+               this.save('value', this.get('price') * this.get('units'));
+           }
+
+       });
+
+        var ProductView = Backbone.View.extend({
+            tagName : 'li',
+            templateId : '#productTemplate',
+            events : {
+                "click #btnUpdate" : "updateProduct"
+            },
+            updateProduct : function(){
+                var units = parseInt(this.$("#txtUnits").val(),10);
+                this.model.set('units', units);
+                this.model.update();
+            },
+            initialize : function(){
+                _.bindAll(this, 'render');
+                this.model.on('change', this.render);
+            },
+            render : function(){
+                if (!this.template){
+                    this.template = Handlebars.compile($(this.templateId).html());
+                }
+                this.$el.html(this.template(this.model.toJSON()));
+                return this;
+            }
+        });
+
+
+
+        /*function ProductList(){
+            var _data = [];
+            this.add = function(productName, price){
+                var product = new Product();
+                product.set('name', productName);
+                product.set('price', price);
+                product.set('units', 0);
+                product.update();
+                _data.push(product);
+                this.trigger('add', product);
+            };
+            this.remove = function(productName){
+                var index = _data.indexOf(productName);
+                if (index !== -1){
+                    _data.splice(index,1);
+                    this.trigger('remove', productName);
+                }
+            };
+            this.toJson = function(){
+                var result = [];
+                _data.forEach(function(data){
+                    result.push(data.toJson());
+                });
+                return result;
+            };
+            this.totalValue = function(){
+                return _data.reduce(function(result, product){
+                   result += product.value;
+                },0)
+            }
+            var _callbacks = {};
+            this.on = function(evtName, callback){
+                _callbacks[evtName] = _callbacks[evtName] || [];
+                _callbacks[evtName].push(callback)
+            };
+            this.trigger = function(evtName, data){
+                var callbacks = _callbacks[evtName];
+                callbacks.forEach(function(callback){
+                    callback(data);
+                });
+            };
+        }*/
+
+        var ProductList = Backbone.Collection.extend({
+            model : Product,
+            url : '/products',
+            getValue : function(){
+                var totalValue = this.reduce(function(result, product){
+                    return result + product.get('value');
+                }, 0);
+                return totalValue;
+            }
+        });
+
+        var ProductListView = Backbone.View.extend({
+            el : "div.content",
+            events : {
+                "click #btnAdd" : 'addNewProduct'
+            },
+            addNewProduct : function(){
+                var name = this.$("#txtName").val(),
+                    price = parseInt(this.$("#txtPrice").val(),10);
+                this.collection.create({
+                    name : name,
+                    price : price
+                });
+            },
+            onNewProduct : function(newProduct){
+                var newProductView = new ProductView({model : newProduct});
+                newProductView.render().$el.appendTo(this.$("#olProductList"));
+            },
+            initialize : function(){
+                _.bindAll(this, "onNewProduct", "render");
+                this.collection.on('add', this.onNewProduct);
+                this.collection.on('all', this.render);
+            },
+            render : function(){
+                this.$("#listCount").html(this.collection.length);
+                this.$("#listValue").html(this.collection.getValue());
+            }
+        });
+
+        /*function ProductListView(productList){
+            var $el = this.$el = $("<div></div>");
+            this.initialize = function(){
+                productList.on("add", this.onNewProduct.bind(this));
+                productList.on("remove", this.render.bind(this));
+                $el.on("click", "#btnAdd", this.addProduct);
+            };
+            var self = this;
+            this.onNewProduct = function(newProduct){
+                var productView = new ProductView(newProduct);
+                productView.initialize();
+                var productList = $("#olProductList", $el);
+                productView.render().$el.appendTo(productList);
+            }
+
+            this.addProduct = function(){
+                var productName = $("#txtName", $el).val();
+                var productPrice = parseInt($("#txtPrice", $el).val(),10);
+                productList.add(productName, productPrice);
+            };
+
+            var template = null;
+            this.render = function(){
+                var viewData = {
+                    list : productList.toJson(),
+                    count : productList.toJson().length,
+                    listValue : productList.totalValue()
+                };
+                if (!template){
+                    var templateHtml = $("#productListTemplate").html();
+                    template = Handlebars.compile(templateHtml);
+                }
+                $el.html(template(viewData));
+                return this;
+            }
+        }*/
+
+
+        $(function(){
+            window.list = new ProductList();
+            var view = new ProductListView({collection : list});
+            list.fetch();
+        });
+    </script>
+</head>
+<body>
+    <div class="content">
+        <h1>Product List</h1>
+        <hr>
+        <label for="">Name :</label>
+        <input type="text" name="" id="txtName">
+        <label for="">Price :</label>
+        <input type="text" name="" id="txtPrice">
+        <input type="button" value="Add" id="btnAdd">
+
+        <ol id="olProductList">
+
+        </ol>
+        <div>
+            <span>Product Count :</span> <span class="count" id="listCount">{{count}}</span>
+            <br>
+            <span>Total Product Value :</span> <span class="count" id="listValue">{{listValue}}</span>
+        </div>
+
+</body>
+</html>
