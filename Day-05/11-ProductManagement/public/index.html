@@ -42,7 +42,11 @@
             tagName : 'li',
             templateId : '#productTemplate',
             events : {
-                "click #btnUpdate" : "updateProduct"
+                "click #btnUpdate" : "updateProduct",
+                "click #btnRemove" : "removeProduct"
+            },
+            removeProduct : function(){
+              this.model.destroy();
             },
             updateProduct : function(){
                 var units = parseInt(this.$("#txtUnits").val(),10);
@@ -50,8 +54,12 @@
                 this.model.update();
             },
             initialize : function(){
-                _.bindAll(this, 'render');
+                _.bindAll(this, 'render', 'remove');
                 this.model.on('change', this.render);
+                this.model.on('destroy', this.remove);
+            },
+            remove : function(){
+                this.$el.remove();
             },
             render : function(){
                 if (!this.template){
