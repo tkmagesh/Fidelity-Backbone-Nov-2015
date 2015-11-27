@@ -13,8 +13,9 @@
         <input type="text" name="" id="txtUnits">
         <input type="button" value="Update" id="btnUpdate">
         <span> {{value}} </span>
-
+        <input type="button" value="Remove" id="btnRemove">
     </script>
+
     <script type="text/x-handlebars-template" id="productListTemplate">
     <div class="content">
         <h1>Product List</h1>
@@ -24,7 +25,7 @@
         <label for="">Price :</label>
         <input type="text" name="" id="txtPrice">
         <input type="button" value="Add" id="btnAdd">
-        <input type="button" value="Remove" id="btnRemove">
+
         <ol id="olProductList">
             {{#each list}}
 
